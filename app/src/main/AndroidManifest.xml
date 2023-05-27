@@ -21,6 +21,7 @@
             android:name=".OnboardingActivity"
             android:exported="false"
             android:label="@string/title_activity_onboarding"
+            android:windowSoftInputMode="adjustResize"
             android:theme="@style/Theme.LittleLemonCapstone" />
         <activity
             android:name=".WelcomeActivity"
