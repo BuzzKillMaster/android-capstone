@@ -13,6 +13,11 @@
         android:theme="@style/Theme.LittleLemonCapstone"
         tools:targetApi="31">
         <activity
+            android:name=".HomeActivity"
+            android:exported="false"
+            android:label="@string/title_activity_home"
+            android:theme="@style/Theme.LittleLemonCapstone" />
+        <activity
             android:name=".ProfileActivity"
             android:exported="false"
             android:label="@string/title_activity_profile"
@@ -21,8 +26,8 @@
             android:name=".OnboardingActivity"
             android:exported="false"
             android:label="@string/title_activity_onboarding"
-            android:windowSoftInputMode="adjustResize"
-            android:theme="@style/Theme.LittleLemonCapstone" />
+            android:theme="@style/Theme.LittleLemonCapstone"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".WelcomeActivity"
             android:exported="false"
