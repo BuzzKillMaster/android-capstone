@@ -36,11 +36,3 @@ fun Greeting2(name: String, modifier: Modifier = Modifier) {
         modifier = modifier
     )
 }
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview2() {
-    LittleLemonCapstoneTheme {
-        Greeting2("Android")
-    }
-}
