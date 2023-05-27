@@ -39,7 +39,9 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.example.littlelemoncapstone.models.User
 import com.example.littlelemoncapstone.ui.theme.LittleLemonCapstoneTheme
+import com.google.gson.Gson
 import kotlinx.coroutines.launch
 
 class OnboardingActivity : ComponentActivity() {
@@ -80,9 +82,11 @@ class OnboardingActivity : ComponentActivity() {
     }
 
     private fun registerUser(name: String, email: String) {
-        val preferences = getSharedPreferences("user", MODE_PRIVATE)
+        val preferences = getSharedPreferences("LittleLemon", MODE_PRIVATE)
 
-        // TODO: Save name and email to preferences using a User object and Gson
+        val user = User(name, email)
+        val userJson = Gson().toJson(user)
+        preferences.edit().putString("user", userJson).apply()
 
         val intent = Intent(this, HomeActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
