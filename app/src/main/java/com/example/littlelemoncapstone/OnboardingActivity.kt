@@ -1,5 +1,6 @@
 package com.example.littlelemoncapstone
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Patterns
 import androidx.activity.ComponentActivity
@@ -68,7 +69,9 @@ class OnboardingActivity : ComponentActivity() {
                                 .fillMaxSize()
                                 .padding(it)
                         ) {
-                            OnboardingScreen()
+                            OnboardingScreen(registerUser = { name, email ->
+                                registerUser(name, email)
+                            })
                         }
                     }
                 }
@@ -80,6 +83,10 @@ class OnboardingActivity : ComponentActivity() {
         val preferences = getSharedPreferences("user", MODE_PRIVATE)
 
         // TODO: Save name and email to preferences using a User object and Gson
+
+        val intent = Intent(this, HomeActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+        startActivity(intent)
     }
 }
 
@@ -137,7 +144,7 @@ fun OnboardingScreen(registerUser: (String, String) -> Unit = { _, _ -> }) {
 
                 1 -> PageView {
                     Text(
-                        "It's nice to meet you, " + name.value + ".\nHow may we contact you?",
+                        "It's nice to meet you, ${name.value}.\nHow may we contact you?",
                         textAlign = TextAlign.Center,
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
