@@ -6,7 +6,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
@@ -23,12 +22,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -60,6 +57,9 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.http.ContentType
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 
@@ -69,8 +69,11 @@ class HomeActivity : ComponentActivity() {
             applicationContext,
             MenuDatabase::class.java,
             "menu.db"
-        ).build()
+        ).fallbackToDestructiveMigration().build()
     }
+
+    // Create a CoroutineScope
+    private val coroutineScope = CoroutineScope(Dispatchers.Default)
 
     // register ktor
     private val client = HttpClient {
@@ -86,11 +89,27 @@ class HomeActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        lifecycleScope.launch {
-            val menuItems = fetchMenu()
+        val preferences = getSharedPreferences("LittleLemon", MODE_PRIVATE)
+        val firstLaunch = preferences.getBoolean("firstLaunch", true)
 
-            runOnUiThread {
-                menuItemsList.value = menuItems
+        if (firstLaunch) {
+            coroutineScope.launch {
+                val menuItems = fetchMenu()
+
+                menuItems.forEach() {
+                    val menuItem = MenuItem(
+                        id = it.id,
+                        title = it.title,
+                        description = it.description,
+                        price = it.price,
+                        image = it.image,
+                        category = it.category
+                    )
+
+                    database.menuDao().insert(menuItem)
+                }
+
+                preferences.edit().putBoolean("firstLaunch", false).apply()
             }
         }
 
@@ -118,7 +137,8 @@ class HomeActivity : ComponentActivity() {
                                 .padding(padding)
                                 .verticalScroll(rememberScrollState())
                         ) {
-                            val menuItems by menuItemsList.observeAsState(emptyList())
+                            val menuItems by database.menuDao().getAll().observeAsState(emptyList())
+
                             val options = listOf("Starters", "Mains", "Desserts")
                             val selectedOption = remember { mutableStateOf<String?>(null) }
                             val searchTerm = remember { mutableStateOf("") }
@@ -241,7 +261,7 @@ fun SortingOption(text: String, selected: Boolean) {
 }
 
 @Composable
-fun HomeScreenMenu(menuItems: List<MenuItemNetwork>) {
+fun HomeScreenMenu(menuItems: List<MenuItem>) {
     Column(
         modifier = Modifier.padding(16.dp)
     ) {
@@ -253,7 +273,7 @@ fun HomeScreenMenu(menuItems: List<MenuItemNetwork>) {
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
-fun MenuItemContainer(menuItem: MenuItemNetwork) {
+fun MenuItemContainer(menuItem: MenuItem) {
     Row(
         modifier = Modifier
             .padding(top = 16.dp, bottom = 16.dp)

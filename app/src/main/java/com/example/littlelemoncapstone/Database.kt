@@ -1,5 +1,6 @@
 package com.example.littlelemoncapstone
 
+import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Database
 import androidx.room.Entity
@@ -14,7 +15,7 @@ import androidx.room.RoomDatabase
 * */
 
 
-@Database(entities = [MenuItem::class], version = 1)
+@Database(entities = [MenuItem::class], version = 3)
 abstract class MenuDatabase : RoomDatabase() {
     abstract fun menuDao(): MenuDao
 }
@@ -24,7 +25,7 @@ data class MenuItem(
     @PrimaryKey val id: Int,
     val title: String,
     val description: String,
-    val price: Double,
+    val price: String,
     val image: String,
     val category: String
 )
@@ -32,7 +33,7 @@ data class MenuItem(
 @Dao
 interface MenuDao {
     @Query("SELECT * FROM MenuItem")
-    fun getAll(): List<MenuItem>
+    fun getAll(): LiveData<List<MenuItem>>
 
     @Insert
     fun insert(menuItem: MenuItem)
