@@ -6,6 +6,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,9 +17,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -26,9 +31,13 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -106,9 +115,14 @@ class HomeActivity : ComponentActivity() {
                                 .verticalScroll(rememberScrollState())
                         ) {
                             val menuItems by menuItemsList.observeAsState(emptyList())
+                            val options = listOf("Starters", "Mains", "Desserts")
+                            val selectedOption = remember { mutableStateOf<String?>(null) }
+
+                            val sortedMenuItems = menuItems.filter { selectedOption.value == null || it.category == selectedOption.value!!.lowercase() }
 
                             HomeScreenHeader()
-                            HomeScreenMenu(menuItems = menuItems)
+                            HomeScreenSortingOptions(options = options, selectedOption = selectedOption)
+                            HomeScreenMenu(menuItems = sortedMenuItems)
                         }
                     }
                 }
@@ -168,6 +182,42 @@ fun HomeScreenHeader() {
                 modifier = Modifier.weight(0.2f)
             )
         }
+    }
+}
+
+@Composable
+fun HomeScreenSortingOptions(options: List<String>, selectedOption: MutableState<String?>) {
+    Row(
+        modifier = Modifier
+            .padding(top = 16.dp)
+            .horizontalScroll(rememberScrollState())
+    ) {
+        options.forEach { option ->
+            Box(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .clickable { selectedOption.value = if (selectedOption.value == option) null else option }
+            ) {
+                SortingOption(text = option, selected = option == selectedOption.value)
+            }
+        }
+    }
+}
+
+@Composable
+fun SortingOption(text: String, selected: Boolean) {
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(12.dp))
+            .background(if (selected) Color(0xFFF4CE14) else Color(0xFF495E57))
+            .padding(16.dp)
+    ) {
+        Text(
+            text = text,
+            color = if (selected) Color(0xFF495E57) else Color(0xFFF4CE14),
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold,
+        )
     }
 }
 
