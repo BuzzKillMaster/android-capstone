@@ -89,4 +89,7 @@ dependencies {
     ksp(libs.androidx.room.compiler)
 
     implementation(libs.androidx.runtime.livedata)
+    implementation(libs.glide)
+    implementation(libs.compose)
+
 }

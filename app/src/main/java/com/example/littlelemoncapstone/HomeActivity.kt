@@ -9,9 +9,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -27,14 +30,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
 import androidx.room.Room
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
 import com.example.littlelemoncapstone.ui.theme.LittleLemonCapstoneTheme
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -43,6 +48,7 @@ import io.ktor.client.request.get
 import io.ktor.http.ContentType
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.launch
+
 
 class HomeActivity : ComponentActivity() {
     private val database by lazy {
@@ -97,13 +103,12 @@ class HomeActivity : ComponentActivity() {
                             modifier = Modifier
                                 .fillMaxSize()
                                 .padding(padding)
+                                .verticalScroll(rememberScrollState())
                         ) {
-                            val items by menuItemsList.observeAsState(emptyList())
+                            val menuItems by menuItemsList.observeAsState(emptyList())
 
-                            HomeScreen()
-                            items.forEach {
-                                MenuItemContainer(menuItem = it)
-                            }
+                            HomeScreenHeader()
+                            HomeScreenMenu(menuItems = menuItems)
                         }
                     }
                 }
@@ -125,13 +130,7 @@ class HomeActivity : ComponentActivity() {
     }
 }
 
-@Composable
-fun HomeScreen() {
-    Column {
-        HomeScreenHeader()
-    }
-}
-
+@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun HomeScreenHeader() {
     Box(
@@ -173,10 +172,55 @@ fun HomeScreenHeader() {
 }
 
 @Composable
+fun HomeScreenMenu(menuItems: List<MenuItemNetwork>) {
+    Column(
+        modifier = Modifier.padding(16.dp)
+    ) {
+        menuItems.forEach {
+            MenuItemContainer(menuItem = it)
+        }
+    }
+}
+
+@OptIn(ExperimentalGlideComposeApi::class)
+@Composable
 fun MenuItemContainer(menuItem: MenuItemNetwork) {
-    Column {
-        Text(text = menuItem.title)
-        Text(text = menuItem.description)
-        Text(text = menuItem.price)
+    Row(
+        modifier = Modifier
+            .padding(top = 16.dp, bottom = 16.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .weight(0.75f)
+                .padding(end = 16.dp)
+        ) {
+            Text(
+                text = menuItem.title,
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp,
+            )
+
+            Text(
+                text = menuItem.description,
+                modifier = Modifier.padding(vertical = 8.dp),
+            )
+
+            Text(
+                text = "$${menuItem.price}",
+                fontWeight = FontWeight.Bold,
+            )
+        }
+
+        Box(modifier = Modifier
+            .weight(0.25f)
+            .aspectRatio(1f)
+        ) {
+            GlideImage(
+                model = menuItem.image,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.matchParentSize(),
+            )
+        }
     }
 }
