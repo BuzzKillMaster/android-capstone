@@ -12,9 +12,11 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -26,9 +28,11 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -117,10 +121,14 @@ class HomeActivity : ComponentActivity() {
                             val menuItems by menuItemsList.observeAsState(emptyList())
                             val options = listOf("Starters", "Mains", "Desserts")
                             val selectedOption = remember { mutableStateOf<String?>(null) }
+                            val searchTerm = remember { mutableStateOf("") }
 
-                            val sortedMenuItems = menuItems.filter { selectedOption.value == null || it.category == selectedOption.value!!.lowercase() }
+                            val sortedMenuItems = menuItems.filter {
+                                it.title.lowercase().contains(searchTerm.value.lowercase())
+                                        && (selectedOption.value == null || it.category == selectedOption.value!!.lowercase())
+                            }
 
-                            HomeScreenHeader()
+                            HomeScreenHeader(searchTerm = searchTerm)
                             HomeScreenSortingOptions(options = options, selectedOption = selectedOption)
                             HomeScreenMenu(menuItems = sortedMenuItems)
                         }
@@ -144,10 +152,10 @@ class HomeActivity : ComponentActivity() {
     }
 }
 
-@OptIn(ExperimentalGlideComposeApi::class)
+@OptIn(ExperimentalGlideComposeApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreenHeader() {
-    Box(
+fun HomeScreenHeader(searchTerm: MutableState<String>) {
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .background(Color(0xFF495E57))
@@ -182,6 +190,15 @@ fun HomeScreenHeader() {
                 modifier = Modifier.weight(0.2f)
             )
         }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        TextField(
+            value = searchTerm.value,
+            onValueChange = { searchTerm.value = it },
+            placeholder = { Text("Enter Search Phrase") },
+            modifier = Modifier.fillMaxWidth(),
+        )
     }
 }
 
@@ -196,7 +213,9 @@ fun HomeScreenSortingOptions(options: List<String>, selectedOption: MutableState
             Box(
                 modifier = Modifier
                     .padding(horizontal = 16.dp)
-                    .clickable { selectedOption.value = if (selectedOption.value == option) null else option }
+                    .clickable {
+                        selectedOption.value = if (selectedOption.value == option) null else option
+                    }
             ) {
                 SortingOption(text = option, selected = option == selectedOption.value)
             }
